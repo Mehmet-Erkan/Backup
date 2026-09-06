@@ -1,0 +1,485 @@
+{
+  "active": true,
+  "activeVersion": {
+    "versionId": "790126c3-2961-43ee-bb45-8200b84e3a06",
+    "workflowId": "E6S318K3Yk04oacQ",
+    "nodes": [
+      {
+        "parameters": {
+          "resource": "order",
+          "operation": "update",
+          "orderId": "={{$node[\"Parse Order ID\"].json[\"orderid\"]}}",
+          "updateFields": {
+            "status": "processing"
+          },
+          "billingUi": {},
+          "couponLinesUi": {},
+          "feeLinesUi": {},
+          "lineItemsUi": {},
+          "metadataUi": {},
+          "shippingUi": {},
+          "shippingLinesUi": {}
+        },
+        "name": "Set Order Status => Processing",
+        "type": "n8n-nodes-base.wooCommerce",
+        "typeVersion": 1,
+        "position": [
+          1200,
+          160
+        ],
+        "id": "7eae81aa-07dd-43f4-a00e-7672b4dce42a",
+        "credentials": {
+          "wooCommerceApi": {
+            "id": "R0Sw4YGjyiaKQqV5",
+            "name": "WooCommerce og-lifestyle"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "authentication": "basicAuth",
+          "requestMethod": "POST",
+          "url": "=https://onegee-lifestyle.ch/wp-json/wc/v3/orders/{{$node[\"Parse Order ID\"].json[\"orderid\"]}}/notes",
+          "options": {},
+          "bodyParametersUi": {
+            "parameter": [
+              {
+                "name": "customer_note",
+                "value": "false"
+              },
+              {
+                "name": "note",
+                "value": "=Workflow n8n: Payrexx Payment Update\n----------------------------------\nPayment Status: {{$node[\"Get Payment Values\"].json[\"status\"]}}\namount: {{$node[\"Parse Order ID\"].json[\"amount\"]}}\ncurrency: {{$node[\"Get Payment Values\"].json[\"currency\"]}}"
+              }
+            ]
+          }
+        },
+        "name": "Set Payment Status to order note",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1,
+        "position": [
+          1424,
+          416
+        ],
+        "id": "948a6ce6-7721-4969-8501-dc150566bd3a",
+        "credentials": {
+          "httpBasicAuth": {
+            "id": "2fDp65PyUcFBseMK",
+            "name": "WooCommerce og-lifestyle Basic Auth"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "value1": "={{$node[\"Get Payment Values\"].json[\"status\"]}}",
+                "value2": "confirmed"
+              }
+            ]
+          }
+        },
+        "name": "If Payment Successful",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1,
+        "position": [
+          784,
+          192
+        ],
+        "id": "d46b0fc4-a131-4883-be57-d702ccdf4de6"
+      },
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "payrexx-oglifestyle",
+          "options": {}
+        },
+        "name": "Webhook Payrexx",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1,
+        "position": [
+          0,
+          192
+        ],
+        "webhookId": "fcb173e1-e6fe-4d27-9a2c-01984025d09c",
+        "id": "7312c73a-429c-4cdf-8d26-4802ea40540d"
+      },
+      {
+        "parameters": {
+          "values": {
+            "number": [
+              {
+                "name": "orderid",
+                "value": "={{$node[\"Webhook Payrexx\"].json[\"body\"][\"transaction\"][\"invoice\"][\"number\"]}}"
+              },
+              {
+                "name": "amount",
+                "value": "={{$node[\"Webhook Payrexx\"].json[\"body\"][\"transaction\"][\"amount\"]}}"
+              }
+            ],
+            "string": [
+              {
+                "name": "currency",
+                "value": "={{$node[\"Webhook Payrexx\"].json[\"body\"][\"transaction\"][\"invoice\"][\"currency\"]}}"
+              },
+              {
+                "name": "status",
+                "value": "={{$node[\"Webhook Payrexx\"].json[\"body\"][\"transaction\"][\"status\"]}}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "name": "Get Payment Values",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1,
+        "position": [
+          240,
+          192
+        ],
+        "alwaysOutputData": true,
+        "notesInFlow": true,
+        "id": "d8b1da48-ef75-4fcf-b773-13699b03f6f6"
+      },
+      {
+        "parameters": {
+          "functionCode": "// Code here will run once per input item.\n// More info and help: https://docs.n8n.io/nodes/n8n-nodes-base.functionItem\n// Tip: You can use luxon for dates and $jmespath for querying JSON structures\n\n// Trim display orderID to the database real ID\nitem.orderid = item.orderid.toLowerCase().replace(\"invoice\", \"\")\nitem.amount = item.amount/100\n\n// You can write logs to the browser console\nconsole.log('Done!');\n\nreturn item;"
+        },
+        "name": "Parse Order ID",
+        "type": "n8n-nodes-base.functionItem",
+        "typeVersion": 1,
+        "position": [
+          512,
+          192
+        ],
+        "id": "6f8dad5a-393c-4df8-91dd-ed413719019b"
+      }
+    ],
+    "connections": {
+      "Set Order Status => Processing": {
+        "main": [
+          [
+            {
+              "node": "Set Payment Status to order note",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "If Payment Successful": {
+        "main": [
+          [
+            {
+              "node": "Set Order Status => Processing",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Set Payment Status to order note",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Webhook Payrexx": {
+        "main": [
+          [
+            {
+              "node": "Get Payment Values",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Payment Values": {
+        "main": [
+          [
+            {
+              "node": "Parse Order ID",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Parse Order ID": {
+        "main": [
+          [
+            {
+              "node": "If Payment Successful",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Mehmet  ",
+    "name": "Version 790126c3",
+    "description": "",
+    "autosaved": true,
+    "createdAt": "2026-02-03T19:53:57.116Z",
+    "updatedAt": "2026-02-03T19:54:07.000Z"
+  },
+  "activeVersionId": "790126c3-2961-43ee-bb45-8200b84e3a06",
+  "connections": {
+    "Set Order Status => Processing": {
+      "main": [
+        [
+          {
+            "node": "Set Payment Status to order note",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Payment Successful": {
+      "main": [
+        [
+          {
+            "node": "Set Order Status => Processing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set Payment Status to order note",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Payrexx": {
+      "main": [
+        [
+          {
+            "node": "Get Payment Values",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Payment Values": {
+      "main": [
+        [
+          {
+            "node": "Parse Order ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Order ID": {
+      "main": [
+        [
+          {
+            "node": "If Payment Successful",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2025-09-13T09:25:29.946Z",
+  "id": "E6S318K3Yk04oacQ",
+  "isArchived": false,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "name": "Payment Update for Payrexx in WooCommerce",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "parameters": {
+        "resource": "order",
+        "operation": "update",
+        "orderId": "={{$node[\"Parse Order ID\"].json[\"orderid\"]}}",
+        "updateFields": {
+          "status": "processing"
+        },
+        "billingUi": {},
+        "couponLinesUi": {},
+        "feeLinesUi": {},
+        "lineItemsUi": {},
+        "metadataUi": {},
+        "shippingUi": {},
+        "shippingLinesUi": {}
+      },
+      "name": "Set Order Status => Processing",
+      "type": "n8n-nodes-base.wooCommerce",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        160
+      ],
+      "id": "7eae81aa-07dd-43f4-a00e-7672b4dce42a",
+      "credentials": {
+        "wooCommerceApi": {
+          "id": "R0Sw4YGjyiaKQqV5",
+          "name": "WooCommerce og-lifestyle"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "basicAuth",
+        "requestMethod": "POST",
+        "url": "=https://onegee-lifestyle.ch/wp-json/wc/v3/orders/{{$node[\"Parse Order ID\"].json[\"orderid\"]}}/notes",
+        "options": {},
+        "bodyParametersUi": {
+          "parameter": [
+            {
+              "name": "customer_note",
+              "value": "false"
+            },
+            {
+              "name": "note",
+              "value": "=Workflow n8n: Payrexx Payment Update\n----------------------------------\nPayment Status: {{$node[\"Get Payment Values\"].json[\"status\"]}}\namount: {{$node[\"Parse Order ID\"].json[\"amount\"]}}\ncurrency: {{$node[\"Get Payment Values\"].json[\"currency\"]}}"
+            }
+          ]
+        }
+      },
+      "name": "Set Payment Status to order note",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        1424,
+        416
+      ],
+      "id": "948a6ce6-7721-4969-8501-dc150566bd3a",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "2fDp65PyUcFBseMK",
+          "name": "WooCommerce og-lifestyle Basic Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$node[\"Get Payment Values\"].json[\"status\"]}}",
+              "value2": "confirmed"
+            }
+          ]
+        }
+      },
+      "name": "If Payment Successful",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        784,
+        192
+      ],
+      "id": "d46b0fc4-a131-4883-be57-d702ccdf4de6"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "payrexx-oglifestyle",
+        "options": {}
+      },
+      "name": "Webhook Payrexx",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        0,
+        192
+      ],
+      "webhookId": "fcb173e1-e6fe-4d27-9a2c-01984025d09c",
+      "id": "7312c73a-429c-4cdf-8d26-4802ea40540d"
+    },
+    {
+      "parameters": {
+        "values": {
+          "number": [
+            {
+              "name": "orderid",
+              "value": "={{$node[\"Webhook Payrexx\"].json[\"body\"][\"transaction\"][\"invoice\"][\"number\"]}}"
+            },
+            {
+              "name": "amount",
+              "value": "={{$node[\"Webhook Payrexx\"].json[\"body\"][\"transaction\"][\"amount\"]}}"
+            }
+          ],
+          "string": [
+            {
+              "name": "currency",
+              "value": "={{$node[\"Webhook Payrexx\"].json[\"body\"][\"transaction\"][\"invoice\"][\"currency\"]}}"
+            },
+            {
+              "name": "status",
+              "value": "={{$node[\"Webhook Payrexx\"].json[\"body\"][\"transaction\"][\"status\"]}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Get Payment Values",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        240,
+        192
+      ],
+      "alwaysOutputData": true,
+      "notesInFlow": true,
+      "id": "d8b1da48-ef75-4fcf-b773-13699b03f6f6"
+    },
+    {
+      "parameters": {
+        "functionCode": "// Code here will run once per input item.\n// More info and help: https://docs.n8n.io/nodes/n8n-nodes-base.functionItem\n// Tip: You can use luxon for dates and $jmespath for querying JSON structures\n\n// Trim display orderID to the database real ID\nitem.orderid = item.orderid.toLowerCase().replace(\"invoice\", \"\")\nitem.amount = item.amount/100\n\n// You can write logs to the browser console\nconsole.log('Done!');\n\nreturn item;"
+      },
+      "name": "Parse Order ID",
+      "type": "n8n-nodes-base.functionItem",
+      "typeVersion": 1,
+      "position": [
+        512,
+        192
+      ],
+      "id": "6f8dad5a-393c-4df8-91dd-ed413719019b"
+    }
+  ],
+  "pinData": {},
+  "repo_name": "Backup",
+  "repo_owner": "Mehmet-Erkan",
+  "repo_path": "n8nCloud-CODE42/",
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "E6S318K3Yk04oacQ",
+      "projectId": "ZTyinjvZElcRQ4RK",
+      "createdAt": "2025-09-13T09:25:29.951Z",
+      "updatedAt": "2025-09-13T09:25:29.951Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [
+    {
+      "id": "1",
+      "name": "Production",
+      "createdAt": "2022-04-16T15:42:19.060Z",
+      "updatedAt": "2022-04-16T15:42:19.060Z"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2026-02-03T19:53:57.114Z",
+  "versionId": "790126c3-2961-43ee-bb45-8200b84e3a06"
+}
