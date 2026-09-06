@@ -1,0 +1,154 @@
+{
+  "active": true,
+  "activeVersion": {
+    "versionId": "832e803a-119e-45d4-9099-de878fddb97a",
+    "workflowId": "CwQOUBFLdIAYVOL0",
+    "nodes": [
+      {
+        "parameters": {},
+        "name": "Error Trigger",
+        "type": "n8n-nodes-base.errorTrigger",
+        "position": [
+          512,
+          304
+        ],
+        "typeVersion": 1,
+        "id": "de34dd83-9b10-4b1d-a7ca-1a8f9796f747"
+      },
+      {
+        "parameters": {
+          "fromEmail": "mehmet.erkan@code42.swiss",
+          "toEmail": "mehmet.erkan@code42.swiss",
+          "subject": "=n8n Workflow Failure: {{$json[\"workflow\"][\"name\"]}}",
+          "text": "=Workflow: {{$json[\"workflow\"][\"name\"]}}\nError: {{$json[\"execution\"][\"error\"][\"message\"]}}\nLast node executed: {{$json[\"execution\"][\"lastNodeExecuted\"]}}\nExecution URL: {{$json[\"execution\"][\"url\"]}}\nStacktrace:\n{{$json[\"execution\"][\"error\"][\"stack\"]}}",
+          "options": {}
+        },
+        "name": "Send Email1",
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 1,
+        "position": [
+          768,
+          304
+        ],
+        "id": "2a5648a5-1b55-44a8-a03b-6a7bfae72763",
+        "credentials": {
+          "smtp": {
+            "id": "4bDqA46onKV3Yw6L",
+            "name": "SMTP CODE42 (Mehmet)"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Error Trigger": {
+        "main": [
+          [
+            {
+              "node": "Send Email1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Mehmet  ",
+    "name": "Version 832e803a",
+    "description": "",
+    "autosaved": true,
+    "createdAt": "2026-05-04T18:18:17.284Z",
+    "updatedAt": "2026-05-04T18:18:29.000Z"
+  },
+  "activeVersionId": "832e803a-119e-45d4-9099-de878fddb97a",
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Send Email1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-02-12T17:10:38.325Z",
+  "id": "CwQOUBFLdIAYVOL0",
+  "isArchived": false,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "name": "Send email von workflow error (Mehmet CODE42)",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "parameters": {},
+      "name": "Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "position": [
+        512,
+        304
+      ],
+      "typeVersion": 1,
+      "id": "de34dd83-9b10-4b1d-a7ca-1a8f9796f747"
+    },
+    {
+      "parameters": {
+        "fromEmail": "mehmet.erkan@code42.swiss",
+        "toEmail": "mehmet.erkan@code42.swiss",
+        "subject": "=n8n Workflow Failure: {{$json[\"workflow\"][\"name\"]}}",
+        "text": "=Workflow: {{$json[\"workflow\"][\"name\"]}}\nError: {{$json[\"execution\"][\"error\"][\"message\"]}}\nLast node executed: {{$json[\"execution\"][\"lastNodeExecuted\"]}}\nExecution URL: {{$json[\"execution\"][\"url\"]}}\nStacktrace:\n{{$json[\"execution\"][\"error\"][\"stack\"]}}",
+        "options": {}
+      },
+      "name": "Send Email1",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [
+        768,
+        304
+      ],
+      "id": "2a5648a5-1b55-44a8-a03b-6a7bfae72763",
+      "credentials": {
+        "smtp": {
+          "id": "4bDqA46onKV3Yw6L",
+          "name": "SMTP CODE42 (Mehmet)"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "repo_name": "Backup",
+  "repo_owner": "Mehmet-Erkan",
+  "repo_path": "n8nCloud-Personal/",
+  "settings": {
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionOrder": "v0",
+    "availableInMCP": false,
+    "errorWorkflow": "1003",
+    "binaryMode": "separate"
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "CwQOUBFLdIAYVOL0",
+      "projectId": "S70xnO0VpG8v5Nyf",
+      "createdAt": "2026-02-12T17:10:38.330Z",
+      "updatedAt": "2026-02-12T17:10:38.330Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [
+    {
+      "id": "1",
+      "name": "Production",
+      "createdAt": "2022-04-16T15:42:19.060Z",
+      "updatedAt": "2022-04-16T15:42:19.060Z"
+    }
+  ],
+  "triggerCount": 0,
+  "updatedAt": "2026-05-04T18:18:25.967Z",
+  "versionId": "832e803a-119e-45d4-9099-de878fddb97a"
+}
