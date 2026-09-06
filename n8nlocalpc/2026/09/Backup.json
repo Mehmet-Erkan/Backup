@@ -1,0 +1,306 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "n8n": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Failed Flows": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Completed Notification",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute Workflow",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Workflow": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Failed Flows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "n8n",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On clicking 'execute'": {
+      "main": [
+        [
+          {
+            "node": "n8n",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-09-06T07:10:11.467Z",
+  "id": "B7LESGNGG0wRjEVE",
+  "isArchived": true,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "name": "Backup",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "61b8b143-5f8e-414f-a2f6-3a10de7533f3",
+      "name": "On clicking 'execute'",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        480,
+        80
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "filters": {},
+        "requestOptions": {}
+      },
+      "id": "54723d34-d773-47a2-af8a-dfd2130ce699",
+      "name": "n8n",
+      "type": "n8n-nodes-base.n8n",
+      "position": [
+        784,
+        192
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "n8nApi": {
+          "id": "pizNcAV8aTeSAaIm",
+          "name": "n8n local backup"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "7315788f-b951-4889-bff2-adda0e89863d",
+      "name": "Loop Over Items",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [
+        1088,
+        192
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 1,
+              "triggerAtMinute": 33
+            }
+          ]
+        }
+      },
+      "id": "15cfc2bb-4b62-4f28-bebf-67976848fdd9",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [
+        480,
+        288
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "workflowId": "={{ $workflow.id }}",
+        "mode": "each",
+        "options": {}
+      },
+      "id": "7aeee326-22c7-4233-b86d-480256baa6c8",
+      "name": "Execute Workflow",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "position": [
+        1328,
+        416
+      ],
+      "typeVersion": 1,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0ATV4Z7F6D",
+          "mode": "list",
+          "cachedResultName": "logs"
+        },
+        "text": "=✅ Backup has completed - {{ $('n8n').all().length }} workflows have been processed.",
+        "otherOptions": {}
+      },
+      "id": "fa05c5a8-20ef-46f3-8bec-9ac0b1ec690c",
+      "name": "Completed Notification",
+      "type": "n8n-nodes-base.slack",
+      "position": [
+        1376,
+        -32
+      ],
+      "webhookId": "a0c6e8c8-5d71-40fa-b02b-63a7ed5726c4",
+      "executeOnce": true,
+      "typeVersion": 2.2,
+      "credentials": {
+        "slackApi": {
+          "id": "ep88DdmMEOQLpahJ",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0ATV4Z7F6D",
+          "mode": "list",
+          "cachedResultName": "logs"
+        },
+        "text": "=:x: Failed to backup {{ $('Loop Over Items').item.json.id }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "id": "ec0a2406-466e-4738-8b6e-4ab20a0745b1",
+      "name": "Failed Flows",
+      "type": "n8n-nodes-base.slack",
+      "position": [
+        1712,
+        432
+      ],
+      "webhookId": "2a092edb-de12-490f-931b-34d70e7d7696",
+      "typeVersion": 2.2,
+      "credentials": {
+        "slackApi": {
+          "id": "ep88DdmMEOQLpahJ",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "owner": {
+          "__rl": true,
+          "value": "Mehmet-Erkan",
+          "mode": "list",
+          "cachedResultName": "Mehmet-Erkan",
+          "cachedResultUrl": "https://github.com/Mehmet-Erkan"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "Backup",
+          "mode": "list",
+          "cachedResultName": "Backup",
+          "cachedResultUrl": "https://github.com/Mehmet-Erkan/Backup"
+        },
+        "filePath": "test.md",
+        "binaryData": true,
+        "binaryPropertyName": "",
+        "commitMessage": "Backup"
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        1664,
+        160
+      ],
+      "id": "e5b147e3-7451-429f-aeae-e20d14857e59",
+      "name": "Create a file",
+      "webhookId": "f263596f-00bb-4d6a-afcf-9f8270dcaa5d",
+      "credentials": {
+        "githubApi": {
+          "id": "2H2VovjuUhlLY62X",
+          "name": "GitHub account"
+        }
+      },
+      "disabled": true
+    }
+  ],
+  "pinData": {},
+  "repo_name": "Backup",
+  "repo_owner": "Mehmet-Erkan",
+  "repo_path": "n8nlocalpc/",
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "timezone": "Europe/Zurich",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "B7LESGNGG0wRjEVE",
+      "projectId": "dYGChC9TXiRcCP2n",
+      "createdAt": "2026-09-06T07:10:11.469Z",
+      "updatedAt": "2026-09-06T07:10:11.469Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-09-06T13:47:19.000Z",
+  "versionId": "35364c55-6b34-4d8b-91a1-05cf6de2a833"
+}
