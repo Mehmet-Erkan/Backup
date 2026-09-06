@@ -1,0 +1,279 @@
+{
+  "active": true,
+  "activeVersion": {
+    "versionId": "2f2543a0-ae69-442d-8eb0-809efb2e12ef",
+    "workflowId": "HM6lNdOiNRKyQ29D",
+    "nodes": [
+      {
+        "parameters": {
+          "inputSource": "passthrough"
+        },
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1.1,
+        "position": [
+          -880,
+          -112
+        ],
+        "id": "f8a9f8ce-364b-4732-ab54-9f41a48d4e59",
+        "name": "When Executed by Another Workflow"
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "={{ $json.query }}",
+          "options": {
+            "systemMessage": "You are a helpful assistant to send emails"
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 2.2,
+        "position": [
+          -576,
+          -112
+        ],
+        "id": "6b5baf4d-90b0-4de9-821d-46e4a136c756",
+        "name": "AI Agent"
+      },
+      {
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4.1-mini"
+          },
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+        "typeVersion": 1.2,
+        "position": [
+          -720,
+          96
+        ],
+        "id": "e492fd5f-f018-4e8b-9500-079e29940f7b",
+        "name": "OpenAI Chat Model",
+        "credentials": {
+          "openAiApi": {
+            "id": "0rvea2FvDm5SxszS",
+            "name": "OpenAi account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To', ``, 'string') }}",
+          "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+          "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.gmailTool",
+        "typeVersion": 2.1,
+        "position": [
+          -432,
+          96
+        ],
+        "id": "666b512f-45cc-4642-a953-5897d659acfe",
+        "name": "Send a message in Gmail",
+        "webhookId": "8bea7d43-11c5-40c7-9210-41c77d4409c4",
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "Q6MQBTAP4SvYhSkc",
+            "name": "Gmail account"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "When Executed by Another Workflow": {
+        "main": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "OpenAI Chat Model": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Send a message in Gmail": {
+        "ai_tool": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "ai_tool",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "system migration",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "createdAt": "2026-01-08T16:30:09.092Z",
+    "updatedAt": "2026-01-08T16:30:09.092Z"
+  },
+  "activeVersionId": "2f2543a0-ae69-442d-8eb0-809efb2e12ef",
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2025-08-09T15:03:04.394Z",
+  "id": "HM6lNdOiNRKyQ29D",
+  "isArchived": false,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "name": "Send Email Pinecone",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -880,
+        -112
+      ],
+      "id": "f8a9f8ce-364b-4732-ab54-9f41a48d4e59",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.query }}",
+        "options": {
+          "systemMessage": "You are a helpful assistant to send emails"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -576,
+        -112
+      ],
+      "id": "6b5baf4d-90b0-4de9-821d-46e4a136c756",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -720,
+        96
+      ],
+      "id": "e492fd5f-f018-4e8b-9500-079e29940f7b",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "0rvea2FvDm5SxszS",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To', ``, 'string') }}",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        -432,
+        96
+      ],
+      "id": "666b512f-45cc-4642-a953-5897d659acfe",
+      "name": "Send a message in Gmail",
+      "webhookId": "8bea7d43-11c5-40c7-9210-41c77d4409c4",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "Q6MQBTAP4SvYhSkc",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "repo_name": "Backup",
+  "repo_owner": "Mehmet-Erkan",
+  "repo_path": "n8nCloud-Personal/",
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "HM6lNdOiNRKyQ29D",
+      "projectId": "S70xnO0VpG8v5Nyf",
+      "createdAt": "2025-08-09T15:03:04.399Z",
+      "updatedAt": "2025-08-09T15:03:04.399Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [
+    {
+      "id": "fem2HJpZNTi1kUej",
+      "name": "Learning",
+      "createdAt": "2025-07-27T16:28:45.195Z",
+      "updatedAt": "2025-07-27T16:28:45.195Z"
+    }
+  ],
+  "triggerCount": 0,
+  "updatedAt": "2025-08-09T15:26:38.000Z",
+  "versionId": "2f2543a0-ae69-442d-8eb0-809efb2e12ef"
+}
