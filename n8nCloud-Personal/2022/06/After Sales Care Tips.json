@@ -1,0 +1,588 @@
+{
+  "active": true,
+  "activeVersion": {
+    "versionId": "16876e48-a1f6-42c7-8c08-59eb4253357b",
+    "workflowId": "1016",
+    "nodes": [
+      {
+        "parameters": {
+          "keepOnlySet": true,
+          "values": {
+            "string": [
+              {
+                "name": "order_name",
+                "value": "={{$node[\"Order Updated\"].json[\"number\"]}}"
+              },
+              {
+                "name": "status",
+                "value": "={{$node[\"Order Updated\"].json[\"status\"]}}"
+              },
+              {
+                "name": "currency",
+                "value": "={{$node[\"Order Updated\"].json[\"currency\"]}}"
+              },
+              {
+                "name": "payment_method",
+                "value": "={{$node[\"Order Updated\"].json[\"payment_method\"]}}"
+              },
+              {
+                "name": "customer_email",
+                "value": "={{$json[\"billing\"][\"email\"]}}"
+              }
+            ],
+            "number": [
+              {
+                "name": "amount",
+                "value": "={{$json[\"total\"]}}"
+              },
+              {
+                "name": "order_id",
+                "value": "={{$node[\"Order Updated\"].json[\"id\"]}}"
+              },
+              {
+                "name": "customer_id",
+                "value": "={{$node[\"Order Updated\"].json[\"customer_id\"]}}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "name": "Set",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1,
+        "position": [
+          -2864,
+          -1248
+        ],
+        "id": "03058b26-2542-418d-856f-a5966ff441d0"
+      },
+      {
+        "parameters": {
+          "event": "order.updated"
+        },
+        "name": "Order Updated",
+        "type": "n8n-nodes-base.wooCommerceTrigger",
+        "typeVersion": 1,
+        "position": [
+          -3056,
+          -1248
+        ],
+        "webhookId": "7feef80b-2e93-489f-9c16-f3ea44688094",
+        "id": "3275418b-d66a-4434-b3c9-ff7d248a29c7",
+        "credentials": {
+          "wooCommerceApi": {
+            "id": "nRdmMc7AfWoM1Sbo",
+            "name": "WooCommerce onegee.ch"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "value1": "={{$node[\"Order Updated\"].json[\"status\"]}}",
+                "value2": "completed"
+              },
+              {
+                "value1": "={{$node[\"Get Customer Role\"].json[\"role\"]}}",
+                "operation": "notContains",
+                "value2": "Reseller"
+              }
+            ]
+          }
+        },
+        "name": "Order Completed",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1,
+        "position": [
+          -2464,
+          -1248
+        ],
+        "id": "ccaf4607-7a92-4a47-879d-4144b8a8756e"
+      },
+      {
+        "parameters": {
+          "amount": 5,
+          "unit": "days"
+        },
+        "name": "Wait",
+        "type": "n8n-nodes-base.wait",
+        "typeVersion": 1,
+        "position": [
+          -2288,
+          -1424
+        ],
+        "webhookId": "c25074fe-cf36-4cf1-8a6f-19e46dd9fd57",
+        "id": "d4a47ce7-16b9-4f1c-92ac-1364bcabdf24"
+      },
+      {
+        "parameters": {
+          "authentication": "basicAuth",
+          "requestMethod": "POST",
+          "url": "=https://onegee.ch/wp-json/wc/v3/orders/{{$node[\"Set\"].json[\"order_id\"]}}/notes",
+          "options": {},
+          "bodyParametersUi": {
+            "parameter": [
+              {
+                "name": "customer_note",
+                "value": "false"
+              },
+              {
+                "name": "note",
+                "value": "=Workflow n8n:  After Sales Mail (Care Tips) sent"
+              }
+            ]
+          },
+          "headerParametersUi": {
+            "parameter": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        },
+        "name": "Message to Order Note",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1,
+        "position": [
+          -1808,
+          -1424
+        ],
+        "id": "96f3d3d0-652c-4523-85e4-ac0733c5ccc1",
+        "credentials": {
+          "httpBasicAuth": {
+            "id": "2",
+            "name": "WooCommerce onegee.ch"
+          }
+        },
+        "continueOnFail": true
+      },
+      {
+        "parameters": {
+          "requestMethod": "POST",
+          "url": "https://mandrillapp.com/api/1.0/messages/send-template",
+          "jsonParameters": true,
+          "options": {},
+          "bodyParametersJson": "={\n\"key\": \"U9vAStN4RKxYDJEFeNEZIQ\",\n\"template_name\": \"transactional-after-sales-care-tips\",\n\"template_content\": [\n],\n\"message\":\n{\n\"from_email\": \"contact@onegee.ch\",\n\"subject\": \"After Sales Care Tips\",\n\"to\": [{ \"email\": \"{{$node[\"Set\"].json[\"customer_email\"]}}\",\n\"type\": \"to\" }]\n}\n}"
+        },
+        "name": "Send Email with Care Tips",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1,
+        "position": [
+          -2080,
+          -1424
+        ],
+        "retryOnFail": false,
+        "id": "3315367d-abd4-43c2-a094-770689d59b55"
+      },
+      {
+        "parameters": {
+          "resource": "customer",
+          "operation": "get",
+          "customerId": "={{$node[\"Order Updated\"].json[\"customer_id\"]}}"
+        },
+        "name": "Get Customer Role",
+        "type": "n8n-nodes-base.wooCommerce",
+        "typeVersion": 1,
+        "position": [
+          -2656,
+          -1248
+        ],
+        "alwaysOutputData": true,
+        "id": "a42da24c-3e02-4b99-90b6-da6ce0d355b6",
+        "credentials": {
+          "wooCommerceApi": {
+            "id": "nRdmMc7AfWoM1Sbo",
+            "name": "WooCommerce onegee.ch"
+          }
+        },
+        "continueOnFail": true
+      }
+    ],
+    "connections": {
+      "Set": {
+        "main": [
+          [
+            {
+              "node": "Get Customer Role",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Order Updated": {
+        "main": [
+          [
+            {
+              "node": "Set",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Order Completed": {
+        "main": [
+          [
+            {
+              "node": "Wait",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Wait": {
+        "main": [
+          [
+            {
+              "node": "Send Email with Care Tips",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Customer Role": {
+        "main": [
+          [
+            {
+              "node": "Order Completed",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Send Email with Care Tips": {
+        "main": [
+          [
+            {
+              "node": "Message to Order Note",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Mehmet  ",
+    "name": "Version 16876e48",
+    "description": "",
+    "autosaved": true,
+    "createdAt": "2026-02-15T17:08:03.608Z",
+    "updatedAt": "2026-02-15T17:08:12.000Z"
+  },
+  "activeVersionId": "16876e48-a1f6-42c7-8c08-59eb4253357b",
+  "connections": {
+    "Set": {
+      "main": [
+        [
+          {
+            "node": "Get Customer Role",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Order Updated": {
+      "main": [
+        [
+          {
+            "node": "Set",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Order Completed": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Send Email with Care Tips",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Customer Role": {
+      "main": [
+        [
+          {
+            "node": "Order Completed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email with Care Tips": {
+      "main": [
+        [
+          {
+            "node": "Message to Order Note",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2022-06-06T13:13:58.786Z",
+  "id": "1016",
+  "isArchived": false,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "name": "After Sales Care Tips",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "order_name",
+              "value": "={{$node[\"Order Updated\"].json[\"number\"]}}"
+            },
+            {
+              "name": "status",
+              "value": "={{$node[\"Order Updated\"].json[\"status\"]}}"
+            },
+            {
+              "name": "currency",
+              "value": "={{$node[\"Order Updated\"].json[\"currency\"]}}"
+            },
+            {
+              "name": "payment_method",
+              "value": "={{$node[\"Order Updated\"].json[\"payment_method\"]}}"
+            },
+            {
+              "name": "customer_email",
+              "value": "={{$json[\"billing\"][\"email\"]}}"
+            }
+          ],
+          "number": [
+            {
+              "name": "amount",
+              "value": "={{$json[\"total\"]}}"
+            },
+            {
+              "name": "order_id",
+              "value": "={{$node[\"Order Updated\"].json[\"id\"]}}"
+            },
+            {
+              "name": "customer_id",
+              "value": "={{$node[\"Order Updated\"].json[\"customer_id\"]}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Set",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        -2864,
+        -1248
+      ],
+      "id": "03058b26-2542-418d-856f-a5966ff441d0"
+    },
+    {
+      "parameters": {
+        "event": "order.updated"
+      },
+      "name": "Order Updated",
+      "type": "n8n-nodes-base.wooCommerceTrigger",
+      "typeVersion": 1,
+      "position": [
+        -3056,
+        -1248
+      ],
+      "webhookId": "7feef80b-2e93-489f-9c16-f3ea44688094",
+      "id": "3275418b-d66a-4434-b3c9-ff7d248a29c7",
+      "credentials": {
+        "wooCommerceApi": {
+          "id": "nRdmMc7AfWoM1Sbo",
+          "name": "WooCommerce onegee.ch"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$node[\"Order Updated\"].json[\"status\"]}}",
+              "value2": "completed"
+            },
+            {
+              "value1": "={{$node[\"Get Customer Role\"].json[\"role\"]}}",
+              "operation": "notContains",
+              "value2": "Reseller"
+            }
+          ]
+        }
+      },
+      "name": "Order Completed",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -2464,
+        -1248
+      ],
+      "id": "ccaf4607-7a92-4a47-879d-4144b8a8756e"
+    },
+    {
+      "parameters": {
+        "amount": 5,
+        "unit": "days"
+      },
+      "name": "Wait",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [
+        -2288,
+        -1424
+      ],
+      "webhookId": "c25074fe-cf36-4cf1-8a6f-19e46dd9fd57",
+      "id": "d4a47ce7-16b9-4f1c-92ac-1364bcabdf24"
+    },
+    {
+      "parameters": {
+        "authentication": "basicAuth",
+        "requestMethod": "POST",
+        "url": "=https://onegee.ch/wp-json/wc/v3/orders/{{$node[\"Set\"].json[\"order_id\"]}}/notes",
+        "options": {},
+        "bodyParametersUi": {
+          "parameter": [
+            {
+              "name": "customer_note",
+              "value": "false"
+            },
+            {
+              "name": "note",
+              "value": "=Workflow n8n:  After Sales Mail (Care Tips) sent"
+            }
+          ]
+        },
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        }
+      },
+      "name": "Message to Order Note",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        -1808,
+        -1424
+      ],
+      "id": "96f3d3d0-652c-4523-85e4-ac0733c5ccc1",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "2",
+          "name": "WooCommerce onegee.ch"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "requestMethod": "POST",
+        "url": "https://mandrillapp.com/api/1.0/messages/send-template",
+        "jsonParameters": true,
+        "options": {},
+        "bodyParametersJson": "={\n\"key\": \"U9vAStN4RKxYDJEFeNEZIQ\",\n\"template_name\": \"transactional-after-sales-care-tips\",\n\"template_content\": [\n],\n\"message\":\n{\n\"from_email\": \"contact@onegee.ch\",\n\"subject\": \"After Sales Care Tips\",\n\"to\": [{ \"email\": \"{{$node[\"Set\"].json[\"customer_email\"]}}\",\n\"type\": \"to\" }]\n}\n}"
+      },
+      "name": "Send Email with Care Tips",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        -2080,
+        -1424
+      ],
+      "retryOnFail": false,
+      "id": "3315367d-abd4-43c2-a094-770689d59b55"
+    },
+    {
+      "parameters": {
+        "resource": "customer",
+        "operation": "get",
+        "customerId": "={{$node[\"Order Updated\"].json[\"customer_id\"]}}"
+      },
+      "name": "Get Customer Role",
+      "type": "n8n-nodes-base.wooCommerce",
+      "typeVersion": 1,
+      "position": [
+        -2656,
+        -1248
+      ],
+      "alwaysOutputData": true,
+      "id": "a42da24c-3e02-4b99-90b6-da6ce0d355b6",
+      "credentials": {
+        "wooCommerceApi": {
+          "id": "nRdmMc7AfWoM1Sbo",
+          "name": "WooCommerce onegee.ch"
+        }
+      },
+      "continueOnFail": true
+    }
+  ],
+  "pinData": {},
+  "repo_name": "Backup",
+  "repo_owner": "Mehmet-Erkan",
+  "repo_path": "n8nCloud-Personal/",
+  "settings": {
+    "errorWorkflow": "1003"
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "1016",
+      "projectId": "ZTyinjvZElcRQ4RK",
+      "createdAt": "2026-02-15T16:15:39.833Z",
+      "updatedAt": "2026-02-15T16:15:39.833Z"
+    }
+  ],
+  "staticData": {
+    "node:Order Updated": {
+      "webhookId": 1487,
+      "secret": "5448d6a58cda8572b403160f8d1dbfe0"
+    }
+  },
+  "tags": [
+    {
+      "id": "1",
+      "name": "Production",
+      "createdAt": "2022-04-16T15:42:19.060Z",
+      "updatedAt": "2022-04-16T15:42:19.060Z"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2026-02-15T17:08:07.904Z",
+  "versionId": "16876e48-a1f6-42c7-8c08-59eb4253357b"
+}
