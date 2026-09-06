@@ -1,0 +1,599 @@
+{
+  "active": true,
+  "activeVersion": {
+    "versionId": "08d2c51b-b051-45d1-9c97-1174e16a9469",
+    "workflowId": "1005",
+    "nodes": [
+      {
+        "parameters": {
+          "resource": "order",
+          "operation": "update",
+          "orderId": "={{$node[\"Parse Order ID\"].json[\"orderid\"]}}",
+          "updateFields": {
+            "status": "processing"
+          },
+          "billingUi": {},
+          "couponLinesUi": {},
+          "feeLinesUi": {},
+          "lineItemsUi": {},
+          "metadataUi": {},
+          "shippingUi": {},
+          "shippingLinesUi": {}
+        },
+        "name": "Set Order Status => Processing",
+        "type": "n8n-nodes-base.wooCommerce",
+        "typeVersion": 1,
+        "position": [
+          -528,
+          -208
+        ],
+        "executeOnce": false,
+        "id": "bf4bb9b7-76b8-433c-9e0e-178a3a2881f5",
+        "credentials": {
+          "wooCommerceApi": {
+            "id": "nRdmMc7AfWoM1Sbo",
+            "name": "WooCommerce onegee.ch"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "authentication": "basicAuth",
+          "requestMethod": "POST",
+          "url": "=https://onegee.ch/wp-json/wc/v3/orders/{{$node[\"Parse Order ID\"].json[\"orderid\"]}}/notes",
+          "options": {},
+          "bodyParametersUi": {
+            "parameter": [
+              {
+                "name": "customer_note",
+                "value": "false"
+              },
+              {
+                "name": "note",
+                "value": "=Workflow n8n: Stripe Payment Update\n----------------------------------\nPayment Status: {{$node[\"Get Payment Values\"].json[\"status\"]}}\namount: {{$node[\"Parse Order ID\"].json[\"amount\"]}}\ncurrency: {{$node[\"Get Payment Values\"].json[\"currency\"]}}"
+              }
+            ]
+          }
+        },
+        "name": "Set Payment Status to order note",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1,
+        "position": [
+          -304,
+          48
+        ],
+        "id": "4d2a61cc-ba3d-423a-8ebf-5fd3a81fcfa2",
+        "credentials": {
+          "httpBasicAuth": {
+            "id": "2",
+            "name": "WooCommerce onegee.ch"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "value1": "={{$node[\"Get Payment Values\"].json[\"status\"]}}",
+                "value2": "complete"
+              }
+            ]
+          }
+        },
+        "name": "If Payment Successful",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1,
+        "position": [
+          -944,
+          -176
+        ],
+        "id": "cbea40b7-4b36-4700-922e-630e60d66a0b"
+      },
+      {
+        "parameters": {
+          "keepOnlySet": true,
+          "values": {
+            "number": [
+              {
+                "name": "amount",
+                "value": "={{$node[\"Stripe Trigger\"].json[\"data\"][\"object\"][\"amount_total\"]}}"
+              }
+            ],
+            "string": [
+              {
+                "name": "orderid",
+                "value": "={{$node[\"Call Payment Details\"].json[\"line_items\"][\"data\"][0][\"description\"]}}"
+              },
+              {
+                "name": "currency",
+                "value": "={{$node[\"Stripe Trigger\"].json[\"data\"][\"object\"][\"currency\"]}}"
+              },
+              {
+                "name": "status",
+                "value": "={{$node[\"Stripe Trigger\"].json[\"data\"][\"object\"][\"status\"]}}"
+              },
+              {
+                "name": "event_type",
+                "value": "={{$node[\"Stripe Trigger\"].json[\"type\"]}}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "name": "Get Payment Values",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1,
+        "position": [
+          -1616,
+          -176
+        ],
+        "alwaysOutputData": true,
+        "notesInFlow": true,
+        "id": "311a664f-99dc-4edd-9025-c8899f551685"
+      },
+      {
+        "parameters": {
+          "functionCode": "// Code here will run once per input item.\n// More info and help: https://docs.n8n.io/nodes/n8n-nodes-base.functionItem\n// Tip: You can use luxon for dates and $jmespath for querying JSON structures\n\n// Trim display orderID to the database real ID\nitem.orderid = item.orderid.toLowerCase().replace(\"invoice\", \"\").split(\"-\")[0].trim()\nitem.amount = item.amount/100\n\n// You can write logs to the browser console\nconsole.log('Done!');\n\nreturn item;"
+        },
+        "name": "Parse Order ID",
+        "type": "n8n-nodes-base.functionItem",
+        "typeVersion": 1,
+        "position": [
+          -1296,
+          -176
+        ],
+        "id": "7e6894e7-0dac-431a-96b5-7f2c735a4a08"
+      },
+      {
+        "parameters": {
+          "events": [
+            "checkout.session.completed"
+          ]
+        },
+        "name": "Stripe Trigger",
+        "type": "n8n-nodes-base.stripeTrigger",
+        "typeVersion": 1,
+        "position": [
+          -2160,
+          -176
+        ],
+        "webhookId": "6abad476-eb9b-466c-bdff-0f865d144d06",
+        "id": "c4835263-1d29-41f6-837a-838ae39ed1df",
+        "credentials": {
+          "stripeApi": {
+            "id": "9",
+            "name": "Stripe"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "authentication": "headerAuth",
+          "url": "=https://api.stripe.com/v1/checkout/sessions/{{$node[\"Stripe Trigger\"].json[\"data\"][\"object\"][\"id\"]}}",
+          "options": {
+            "useQueryString": true
+          },
+          "queryParametersUi": {
+            "parameter": [
+              {
+                "name": "expand[]",
+                "value": "line_items"
+              }
+            ]
+          }
+        },
+        "name": "Call Payment Details",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1,
+        "position": [
+          -1904,
+          -176
+        ],
+        "id": "7c9aad7f-602b-4b2c-9547-4348e74a844e",
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "8",
+            "name": "Stripe"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Set Order Status => Processing": {
+        "main": [
+          [
+            {
+              "node": "Set Payment Status to order note",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "If Payment Successful": {
+        "main": [
+          [
+            {
+              "node": "Set Order Status => Processing",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Set Payment Status to order note",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Payment Values": {
+        "main": [
+          [
+            {
+              "node": "Parse Order ID",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Parse Order ID": {
+        "main": [
+          [
+            {
+              "node": "If Payment Successful",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Stripe Trigger": {
+        "main": [
+          [
+            {
+              "node": "Call Payment Details",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call Payment Details": {
+        "main": [
+          [
+            {
+              "node": "Get Payment Values",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Mehmet  ",
+    "name": "Version 08d2c51b",
+    "description": "",
+    "autosaved": true,
+    "createdAt": "2026-02-15T17:20:18.898Z",
+    "updatedAt": "2026-02-15T17:20:29.000Z"
+  },
+  "activeVersionId": "08d2c51b-b051-45d1-9c97-1174e16a9469",
+  "connections": {
+    "Set Order Status => Processing": {
+      "main": [
+        [
+          {
+            "node": "Set Payment Status to order note",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Payment Successful": {
+      "main": [
+        [
+          {
+            "node": "Set Order Status => Processing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set Payment Status to order note",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Payment Values": {
+      "main": [
+        [
+          {
+            "node": "Parse Order ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Order ID": {
+      "main": [
+        [
+          {
+            "node": "If Payment Successful",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stripe Trigger": {
+      "main": [
+        [
+          {
+            "node": "Call Payment Details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Payment Details": {
+      "main": [
+        [
+          {
+            "node": "Get Payment Values",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2022-04-21T07:47:33.784Z",
+  "id": "1005",
+  "isArchived": false,
+  "meta": null,
+  "name": "Payment Update for Stripe in WooCommerce",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "parameters": {
+        "resource": "order",
+        "operation": "update",
+        "orderId": "={{$node[\"Parse Order ID\"].json[\"orderid\"]}}",
+        "updateFields": {
+          "status": "processing"
+        },
+        "billingUi": {},
+        "couponLinesUi": {},
+        "feeLinesUi": {},
+        "lineItemsUi": {},
+        "metadataUi": {},
+        "shippingUi": {},
+        "shippingLinesUi": {}
+      },
+      "name": "Set Order Status => Processing",
+      "type": "n8n-nodes-base.wooCommerce",
+      "typeVersion": 1,
+      "position": [
+        -528,
+        -208
+      ],
+      "executeOnce": false,
+      "id": "bf4bb9b7-76b8-433c-9e0e-178a3a2881f5",
+      "credentials": {
+        "wooCommerceApi": {
+          "id": "nRdmMc7AfWoM1Sbo",
+          "name": "WooCommerce onegee.ch"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "basicAuth",
+        "requestMethod": "POST",
+        "url": "=https://onegee.ch/wp-json/wc/v3/orders/{{$node[\"Parse Order ID\"].json[\"orderid\"]}}/notes",
+        "options": {},
+        "bodyParametersUi": {
+          "parameter": [
+            {
+              "name": "customer_note",
+              "value": "false"
+            },
+            {
+              "name": "note",
+              "value": "=Workflow n8n: Stripe Payment Update\n----------------------------------\nPayment Status: {{$node[\"Get Payment Values\"].json[\"status\"]}}\namount: {{$node[\"Parse Order ID\"].json[\"amount\"]}}\ncurrency: {{$node[\"Get Payment Values\"].json[\"currency\"]}}"
+            }
+          ]
+        }
+      },
+      "name": "Set Payment Status to order note",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        -304,
+        48
+      ],
+      "id": "4d2a61cc-ba3d-423a-8ebf-5fd3a81fcfa2",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "2",
+          "name": "WooCommerce onegee.ch"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$node[\"Get Payment Values\"].json[\"status\"]}}",
+              "value2": "complete"
+            }
+          ]
+        }
+      },
+      "name": "If Payment Successful",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -944,
+        -176
+      ],
+      "id": "cbea40b7-4b36-4700-922e-630e60d66a0b"
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "number": [
+            {
+              "name": "amount",
+              "value": "={{$node[\"Stripe Trigger\"].json[\"data\"][\"object\"][\"amount_total\"]}}"
+            }
+          ],
+          "string": [
+            {
+              "name": "orderid",
+              "value": "={{$node[\"Call Payment Details\"].json[\"line_items\"][\"data\"][0][\"description\"]}}"
+            },
+            {
+              "name": "currency",
+              "value": "={{$node[\"Stripe Trigger\"].json[\"data\"][\"object\"][\"currency\"]}}"
+            },
+            {
+              "name": "status",
+              "value": "={{$node[\"Stripe Trigger\"].json[\"data\"][\"object\"][\"status\"]}}"
+            },
+            {
+              "name": "event_type",
+              "value": "={{$node[\"Stripe Trigger\"].json[\"type\"]}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Get Payment Values",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        -1616,
+        -176
+      ],
+      "alwaysOutputData": true,
+      "notesInFlow": true,
+      "id": "311a664f-99dc-4edd-9025-c8899f551685"
+    },
+    {
+      "parameters": {
+        "functionCode": "// Code here will run once per input item.\n// More info and help: https://docs.n8n.io/nodes/n8n-nodes-base.functionItem\n// Tip: You can use luxon for dates and $jmespath for querying JSON structures\n\n// Trim display orderID to the database real ID\nitem.orderid = item.orderid.toLowerCase().replace(\"invoice\", \"\").split(\"-\")[0].trim()\nitem.amount = item.amount/100\n\n// You can write logs to the browser console\nconsole.log('Done!');\n\nreturn item;"
+      },
+      "name": "Parse Order ID",
+      "type": "n8n-nodes-base.functionItem",
+      "typeVersion": 1,
+      "position": [
+        -1296,
+        -176
+      ],
+      "id": "7e6894e7-0dac-431a-96b5-7f2c735a4a08"
+    },
+    {
+      "parameters": {
+        "events": [
+          "checkout.session.completed"
+        ]
+      },
+      "name": "Stripe Trigger",
+      "type": "n8n-nodes-base.stripeTrigger",
+      "typeVersion": 1,
+      "position": [
+        -2160,
+        -176
+      ],
+      "webhookId": "6abad476-eb9b-466c-bdff-0f865d144d06",
+      "id": "c4835263-1d29-41f6-837a-838ae39ed1df",
+      "credentials": {
+        "stripeApi": {
+          "id": "9",
+          "name": "Stripe"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "headerAuth",
+        "url": "=https://api.stripe.com/v1/checkout/sessions/{{$node[\"Stripe Trigger\"].json[\"data\"][\"object\"][\"id\"]}}",
+        "options": {
+          "useQueryString": true
+        },
+        "queryParametersUi": {
+          "parameter": [
+            {
+              "name": "expand[]",
+              "value": "line_items"
+            }
+          ]
+        }
+      },
+      "name": "Call Payment Details",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        -1904,
+        -176
+      ],
+      "id": "7c9aad7f-602b-4b2c-9547-4348e74a844e",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "8",
+          "name": "Stripe"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "repo_name": "Backup",
+  "repo_owner": "Mehmet-Erkan",
+  "repo_path": "n8nCloud-CODE42/",
+  "settings": {
+    "errorWorkflow": "1003"
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "1005",
+      "projectId": "ZTyinjvZElcRQ4RK",
+      "createdAt": "2026-02-15T16:15:39.831Z",
+      "updatedAt": "2026-02-15T16:15:39.831Z"
+    }
+  ],
+  "staticData": {
+    "node:Stripe Trigger": {
+      "webhookId": "we_1T18zhARrQiwxJ1A8U3eitZ6",
+      "webhookEvents": [
+        "checkout.session.completed"
+      ],
+      "webhookSecret": "whsec_wIW4UijKKRDm0OmVYZZkA0Zi5ixXgyA3"
+    }
+  },
+  "tags": [
+    {
+      "id": "1",
+      "name": "Production",
+      "createdAt": "2022-04-16T15:42:19.060Z",
+      "updatedAt": "2022-04-16T15:42:19.060Z"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2026-02-15T17:20:18.897Z",
+  "versionId": "08d2c51b-b051-45d1-9c97-1174e16a9469"
+}
