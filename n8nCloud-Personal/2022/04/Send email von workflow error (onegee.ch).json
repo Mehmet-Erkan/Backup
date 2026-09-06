@@ -1,0 +1,153 @@
+{
+  "active": true,
+  "activeVersion": {
+    "versionId": "0eeb109c-ea38-4ed5-bf04-7294e5b6245f",
+    "workflowId": "1003",
+    "nodes": [
+      {
+        "parameters": {},
+        "name": "Error Trigger",
+        "type": "n8n-nodes-base.errorTrigger",
+        "position": [
+          512,
+          304
+        ],
+        "typeVersion": 1,
+        "id": "b4ee856c-6655-40c3-94b0-90511a4d3e3b"
+      },
+      {
+        "parameters": {
+          "fromEmail": "contact@onegee.ch",
+          "toEmail": "mehmet.erkan@code42.swiss",
+          "ccEmail": "toni@code42.swiss",
+          "subject": "=n8n Workflow Failure: {{$json[\"workflow\"][\"name\"]}}",
+          "text": "=Workflow: {{$json[\"workflow\"][\"name\"]}}\nError: {{$json[\"execution\"][\"error\"][\"message\"]}}\nLast node executed: {{$json[\"execution\"][\"lastNodeExecuted\"]}}\nExecution URL: {{$json[\"execution\"][\"url\"]}}\nStacktrace:\n{{$json[\"execution\"][\"error\"][\"stack\"]}}",
+          "options": {}
+        },
+        "name": "Send Email",
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 1,
+        "position": [
+          768,
+          304
+        ],
+        "id": "d6943ddb-211f-427b-bb81-897e5a6eecff",
+        "credentials": {
+          "smtp": {
+            "id": "10",
+            "name": "Hostar contact@onegee.ch"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Error Trigger": {
+        "main": [
+          [
+            {
+              "node": "Send Email",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Mehmet  ",
+    "name": "Version 0eeb109c",
+    "description": "",
+    "autosaved": false,
+    "createdAt": "2026-01-17T14:43:37.590Z",
+    "updatedAt": "2026-01-17T14:43:41.000Z"
+  },
+  "activeVersionId": "0eeb109c-ea38-4ed5-bf04-7294e5b6245f",
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Send Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2022-04-17T08:55:41.111Z",
+  "id": "1003",
+  "isArchived": false,
+  "meta": null,
+  "name": "Send email von workflow error (onegee.ch)",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "parameters": {},
+      "name": "Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "position": [
+        512,
+        304
+      ],
+      "typeVersion": 1,
+      "id": "b4ee856c-6655-40c3-94b0-90511a4d3e3b"
+    },
+    {
+      "parameters": {
+        "fromEmail": "contact@onegee.ch",
+        "toEmail": "mehmet.erkan@code42.swiss",
+        "ccEmail": "toni@code42.swiss",
+        "subject": "=n8n Workflow Failure: {{$json[\"workflow\"][\"name\"]}}",
+        "text": "=Workflow: {{$json[\"workflow\"][\"name\"]}}\nError: {{$json[\"execution\"][\"error\"][\"message\"]}}\nLast node executed: {{$json[\"execution\"][\"lastNodeExecuted\"]}}\nExecution URL: {{$json[\"execution\"][\"url\"]}}\nStacktrace:\n{{$json[\"execution\"][\"error\"][\"stack\"]}}",
+        "options": {}
+      },
+      "name": "Send Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [
+        768,
+        304
+      ],
+      "id": "d6943ddb-211f-427b-bb81-897e5a6eecff",
+      "credentials": {
+        "smtp": {
+          "id": "10",
+          "name": "Hostar contact@onegee.ch"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "repo_name": "Backup",
+  "repo_owner": "Mehmet-Erkan",
+  "repo_path": "n8nCloud-Personal/",
+  "settings": {
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionOrder": "v0",
+    "availableInMCP": false,
+    "errorWorkflow": "1003"
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "1003",
+      "projectId": "ZTyinjvZElcRQ4RK",
+      "createdAt": "2026-02-15T16:15:39.827Z",
+      "updatedAt": "2026-02-15T16:15:39.827Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [
+    {
+      "id": "1",
+      "name": "Production",
+      "createdAt": "2022-04-16T15:42:19.060Z",
+      "updatedAt": "2022-04-16T15:42:19.060Z"
+    }
+  ],
+  "triggerCount": 0,
+  "updatedAt": "2026-02-15T16:33:37.238Z",
+  "versionId": "0eeb109c-ea38-4ed5-bf04-7294e5b6245f"
+}
