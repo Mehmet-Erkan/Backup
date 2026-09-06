@@ -1,0 +1,459 @@
+{
+  "active": true,
+  "activeVersion": {
+    "versionId": "b4602cd8-f074-4013-bf54-2541b40e4d9e",
+    "workflowId": "HkfFWevj4CEHSJPLmlWXb",
+    "nodes": [
+      {
+        "parameters": {
+          "resource": "playlistItem",
+          "operation": "getAll",
+          "playlistId": "PLlTdvOBqeJ4OS2wZpqOYW3e7qnzRu8Md8",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.youTube",
+        "typeVersion": 1,
+        "position": [
+          -928,
+          -704
+        ],
+        "id": "e4fb13d1-92f9-4ca8-b5ed-6492870e0295",
+        "name": "Get Playlist Items from \"_MyAISummary\"",
+        "credentials": {
+          "youTubeOAuth2Api": {
+            "id": "2l3gEaoEPqWxOO1X",
+            "name": "Youtube Mehmet"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitInBatches",
+        "typeVersion": 3,
+        "position": [
+          -432,
+          -704
+        ],
+        "id": "a61570f8-20b7-4afe-9e77-844e7ee75a03",
+        "name": "Loop Over Items"
+      },
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {}
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.3,
+        "position": [
+          -1248,
+          -704
+        ],
+        "id": "4d84ffde-46fd-416f-9c83-6af8e33131e2",
+        "name": "Schedule Trigger"
+      },
+      {
+        "parameters": {
+          "authentication": "oAuth2",
+          "project": {
+            "__rl": true,
+            "value": "6cGc2F774636qRxx",
+            "mode": "list",
+            "cachedResultName": "Timeline"
+          },
+          "content": "=https://www.youtube.com/watch?v={{ $json.contentDetails.videoId }}",
+          "options": {
+            "description": "=Title:  {{ $json.snippet.videoOwnerChannelTitle }}\nUrl: https://www.youtube.com/watch?v={{ $json.contentDetails.videoId }}\nSource: Youtube\n\nDescription\n{{ $json.snippet.description }}"
+          }
+        },
+        "type": "n8n-nodes-base.todoist",
+        "typeVersion": 2.2,
+        "position": [
+          -112,
+          -688
+        ],
+        "id": "8eaef473-4b9a-4acd-8dd5-e7b2c5f445cd",
+        "name": "Create a task",
+        "retryOnFail": true,
+        "credentials": {
+          "todoistOAuth2Api": {
+            "id": "dFVZqJILIJkwfbL4",
+            "name": "Todoist account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "authentication": "oAuth2",
+          "resource": "comment",
+          "commentTaskId": "={{ $json.id }}",
+          "commentContent": "=Youtube Description:\n{{ $('Get Playlist Items from \"_MyAISummary\"').item.json.snippet.description }}"
+        },
+        "type": "n8n-nodes-base.todoist",
+        "typeVersion": 2.2,
+        "position": [
+          128,
+          -688
+        ],
+        "id": "907e6ff2-b447-46df-9cc5-9da6b8ce5074",
+        "name": "Create a comment1",
+        "credentials": {
+          "todoistOAuth2Api": {
+            "id": "dFVZqJILIJkwfbL4",
+            "name": "Todoist account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "playlistItem",
+          "operation": "delete",
+          "playlistItemId": "={{ $('Get Playlist Items from \"_MyAISummary\"').item.json.id }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.youTube",
+        "typeVersion": 1,
+        "position": [
+          336,
+          -688
+        ],
+        "id": "b6d582d7-4bda-4ccf-bec9-e22a2c3c7590",
+        "name": "Delete a playlist item",
+        "credentials": {
+          "youTubeOAuth2Api": {
+            "id": "2l3gEaoEPqWxOO1X",
+            "name": "Youtube Mehmet"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Get Playlist Items from \"_MyAISummary\"": {
+        "main": [
+          [
+            {
+              "node": "Loop Over Items",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Loop Over Items": {
+        "main": [
+          [],
+          [
+            {
+              "node": "Create a task",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Schedule Trigger": {
+        "main": [
+          [
+            {
+              "node": "Get Playlist Items from \"_MyAISummary\"",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Create a task": {
+        "main": [
+          [
+            {
+              "node": "Create a comment1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Create a comment1": {
+        "main": [
+          [
+            {
+              "node": "Delete a playlist item",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Delete a playlist item": {
+        "main": [
+          [
+            {
+              "node": "Loop Over Items",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Mehmet  ",
+    "name": "Version b4602cd8",
+    "description": "",
+    "autosaved": true,
+    "createdAt": "2026-06-03T18:15:28.697Z",
+    "updatedAt": "2026-06-03T18:15:39.000Z"
+  },
+  "activeVersionId": "b4602cd8-f074-4013-bf54-2541b40e4d9e",
+  "connections": {
+    "Get Playlist Items from \"_MyAISummary\"": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Create a task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Playlist Items from \"_MyAISummary\"",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a task": {
+      "main": [
+        [
+          {
+            "node": "Create a comment1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a comment1": {
+      "main": [
+        [
+          {
+            "node": "Delete a playlist item",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete a playlist item": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-01-11T07:24:53.594Z",
+  "id": "HkfFWevj4CEHSJPLmlWXb",
+  "isArchived": false,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "name": "Create AI Tasks from YouTube Playlists",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "parameters": {
+        "resource": "playlistItem",
+        "operation": "getAll",
+        "playlistId": "PLlTdvOBqeJ4OS2wZpqOYW3e7qnzRu8Md8",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.youTube",
+      "typeVersion": 1,
+      "position": [
+        -928,
+        -704
+      ],
+      "id": "e4fb13d1-92f9-4ca8-b5ed-6492870e0295",
+      "name": "Get Playlist Items from \"_MyAISummary\"",
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": "2l3gEaoEPqWxOO1X",
+          "name": "Youtube Mehmet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -432,
+        -704
+      ],
+      "id": "a61570f8-20b7-4afe-9e77-844e7ee75a03",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -1248,
+        -704
+      ],
+      "id": "4d84ffde-46fd-416f-9c83-6af8e33131e2",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "project": {
+          "__rl": true,
+          "value": "6cGc2F774636qRxx",
+          "mode": "list",
+          "cachedResultName": "Timeline"
+        },
+        "content": "=https://www.youtube.com/watch?v={{ $json.contentDetails.videoId }}",
+        "options": {
+          "description": "=Title:  {{ $json.snippet.videoOwnerChannelTitle }}\nUrl: https://www.youtube.com/watch?v={{ $json.contentDetails.videoId }}\nSource: Youtube\n\nDescription\n{{ $json.snippet.description }}"
+        }
+      },
+      "type": "n8n-nodes-base.todoist",
+      "typeVersion": 2.2,
+      "position": [
+        -112,
+        -688
+      ],
+      "id": "8eaef473-4b9a-4acd-8dd5-e7b2c5f445cd",
+      "name": "Create a task",
+      "retryOnFail": true,
+      "credentials": {
+        "todoistOAuth2Api": {
+          "id": "dFVZqJILIJkwfbL4",
+          "name": "Todoist account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "comment",
+        "commentTaskId": "={{ $json.id }}",
+        "commentContent": "=Youtube Description:\n{{ $('Get Playlist Items from \"_MyAISummary\"').item.json.snippet.description }}"
+      },
+      "type": "n8n-nodes-base.todoist",
+      "typeVersion": 2.2,
+      "position": [
+        128,
+        -688
+      ],
+      "id": "907e6ff2-b447-46df-9cc5-9da6b8ce5074",
+      "name": "Create a comment1",
+      "credentials": {
+        "todoistOAuth2Api": {
+          "id": "dFVZqJILIJkwfbL4",
+          "name": "Todoist account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "playlistItem",
+        "operation": "delete",
+        "playlistItemId": "={{ $('Get Playlist Items from \"_MyAISummary\"').item.json.id }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.youTube",
+      "typeVersion": 1,
+      "position": [
+        336,
+        -688
+      ],
+      "id": "b6d582d7-4bda-4ccf-bec9-e22a2c3c7590",
+      "name": "Delete a playlist item",
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": "2l3gEaoEPqWxOO1X",
+          "name": "Youtube Mehmet"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "repo_name": "Backup",
+  "repo_owner": "Mehmet-Erkan",
+  "repo_path": "n8nCloud-CODE42/",
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "CwQOUBFLdIAYVOL0",
+    "binaryMode": "separate"
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "HkfFWevj4CEHSJPLmlWXb",
+      "projectId": "S70xnO0VpG8v5Nyf",
+      "createdAt": "2026-01-11T07:24:53.603Z",
+      "updatedAt": "2026-01-11T07:24:53.603Z"
+    }
+  ],
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    }
+  },
+  "tags": [
+    {
+      "id": "1",
+      "name": "Production",
+      "createdAt": "2022-04-16T15:42:19.060Z",
+      "updatedAt": "2022-04-16T15:42:19.060Z"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2026-06-03T18:15:28.696Z",
+  "versionId": "b4602cd8-f074-4013-bf54-2541b40e4d9e"
+}
